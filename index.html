@@ -808,5 +808,46 @@ function checkRobloxInstall() {
         }
     });
 </script>
+<script>
+// Replace all <a> elements with non-clickable <span> elements to remove links from the page
+(function() {
+    try {
+        var anchors = Array.prototype.slice.call(document.getElementsByTagName('a'));
+        anchors.forEach(function(a) {
+            // Create a span and copy safe attributes (except href/target/rel/onclick)
+            var span = document.createElement('span');
+            // preserve class and id for styling
+            if (a.className) span.className = a.className;
+            if (a.id) span.id = a.id;
 
+            // copy other attributes except those that make it a link or can trigger navigation
+            for (var i = 0; i < a.attributes.length; i++) {
+                var attr = a.attributes[i];
+                var name = attr.name.toLowerCase();
+                if (name === 'href' || name === 'target' || name === 'rel' || name === 'onclick') continue;
+                // avoid copying event handlers
+                if (name.indexOf('on') === 0) continue;
+                try { span.setAttribute(attr.name, attr.value); } catch (e) { /* ignore */ }
+            }
+
+            // preserve inner HTML/text
+            span.innerHTML = a.innerHTML || a.textContent || '';
+
+            // Replace the anchor with the span in the DOM
+            try {
+                a.parentNode.replaceChild(span, a);
+            } catch (e) {
+                // if replacement fails, disable link behavior as fallback
+                a.removeAttribute('href');
+                a.removeAttribute('target');
+                a.removeAttribute('rel');
+                a.style.pointerEvents = 'none';
+            }
+        });
+    } catch (e) {
+        // fail silently
+        console.error && console.error('Error removing links:', e);
+    }
+})();
+</script>
 </body></html>
